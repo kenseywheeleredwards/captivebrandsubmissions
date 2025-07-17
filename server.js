@@ -65,14 +65,14 @@ app.post("/", async (req, res) => {
   }
 
   try {
-    await axios.post("https://hooks.zapier.com/hooks/catch/11992512/u28cwau/", {
+    await axios.post("https://hooks.slack.com/triggers/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", {
       dealerName,
       responses
     });
-    res.status(200).send("Data relayed successfully to Zapier.");
+    res.status(200).send("Data relayed successfully.");
   } catch (error) {
-    console.error("Error relaying to Zapier:", error.message);
-    res.status(500).send("Error relaying data to Zapier.");
+    console.error("Error relaying:", error.message);
+    res.status(500).send("Error relaying data.");
   }
 });
 
