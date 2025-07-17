@@ -1,59 +1,83 @@
+// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// POST handler
-app.post("/submit", async (req, res) => {
-  const { dealerName, responses } = req.body;
+app.post('/submit', async (req, res) => {
+  const {
+    dealerName,
+    brandName,
+    competitors,
+    symbolism,
+    colors,
+    avoidColors,
+    brandguidelines,
+    brandIdeas
+  } = req.body;
 
-  // Format response body into Q&A style message
-  let message = `🧾 New Captive Brand Survey Submission\n\n`;
-  message += `👤 Dealer Name: ${dealerName || "N/A"}\n\n`;
+  const responses = [];
 
-  if (responses?.length) {
-    responses.forEach((r, i) => {
-      message += `Q${i + 1}: ${r.question || "(no question)"}\n`;
-      message += `A: ${r.answer || "(no answer)"}\n\n`;
-    });
-  } else {
-    message += "No detailed responses submitted.\n";
+  if (dealerName) {
+    responses.push({ question: "What is your name and what dealership are you from?", answer: dealerName });
+  }
+  if (brandName) {
+    responses.push({ question: "What do you want to call it?", answer: brandName });
+  }
+  if (brandguidelines) {
+    responses.push({ question: "Do you have a link to your brand guidelines?", answer: brandguidelines });
+  }
+  if (brandIdeas) {
+    responses.push({ question: "Tell me what you're thinking for brand ideas.", answer: brandIdeas });
+  }
+  if (competitors) {
+    responses.push({ question: "Who are your top competitors?", answer: competitors });
+  }
+  if (symbolism) {
+    responses.push({ question: "Is there any symbolism you'd like included in your captive brand?", answer: symbolism });
+  }
+  if (colors) {
+    responses.push({ question: "What colors would you like to include?", answer: colors });
+  }
+  if (avoidColors) {
+    responses.push({ question: "What colors should be avoided?", answer: avoidColors });
   }
 
-  // Optional: Write to local log file
-  fs.appendFile("submissions.txt", message + "-------------------------\n", (err) => {
-    if (err) console.error("Failed to log to file:", err);
-  });
+  const htmlBody = `
+    <h2>Captive Brand Survey Submission</h2>
+    <p><strong>Dealer Name:</strong> ${dealerName || 'N/A'}</p>
+    <ul>
+      ${responses.map(r => `<li><strong>${r.question}</strong><br>${r.answer}</li>`).join('')}
+    </ul>
+  `;
 
-  // Send email via Nodemailer (use Gmail, Mailgun, or other SMTP)
   const transporter = nodemailer.createTransport({
-    service: 'gmail', // or 'SendGrid', 'Mailgun', etc.
+    service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,       // Your email (e.g. gmail)
-      pass: process.env.EMAIL_PASS        // App password (not account password)
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
     }
   });
 
-  try {
-    await transporter.sendMail({
-      from: `"Captive Survey Bot" <${process.env.EMAIL_USER}>`,
-      to: "kensey.edwards@octane.co", // or whatever email you prefer
-      subject: "📬 New Captive Brand Survey Submission",
-      text: message
-    });
+  const mailOptions = {
+    from: `Captive Brand Survey <${process.env.EMAIL_USER}>`,
+    to: 'kensey.edwards@octane.co',
+    subject: `New Captive Brand Submission from ${dealerName}`,
+    html: htmlBody
+  };
 
-    res.status(200).json({ success: true, message: "Email sent and logged." });
-  } catch (err) {
-    console.error("Email failed:", err);
-    res.status(500).json({ success: false, error: "Failed to send email." });
+  try {
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ error: 'Error sending email' });
   }
 });
 
