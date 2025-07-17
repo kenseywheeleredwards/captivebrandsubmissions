@@ -1,35 +1,78 @@
-// server.js
 const express = require("express");
-const cors = require("cors");
 const bodyParser = require("body-parser");
-const fetch = require("node-fetch");
+const axios = require("axios");
+const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-app.post("/submit", async (req, res) => {
-  try {
-    const payload = req.body;
+app.post("/", async (req, res) => {
+  const {
+    dealerName,
+    brandName,
+    competitors,
+    symbolism,
+    colors,
+    avoidColors
+  } = req.body;
 
-    const zapierWebhookUrl = "https://hooks.zapier.com/hooks/catch/11992512/u28cwau/";
+  const responses = [];
 
-    const zapierRes = await fetch(zapierWebhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+  if (dealerName) {
+    responses.push({
+      question: "What is your name and what dealership are you from?",
+      answer: dealerName
     });
+  }
 
-    if (!zapierRes.ok) {
-      throw new Error(`Zapier responded with status ${zapierRes.status}`);
-    }
+  if (brandName) {
+    responses.push({
+      question: "What do you want to call it?",
+      answer: brandName
+    });
+  }
 
-    res.status(200).json({ message: "Submission relayed to Zapier successfully." });
+  if (competitors) {
+    responses.push({
+      question: "Who are your top competitors?",
+      answer: competitors
+    });
+  }
+
+  if (symbolism) {
+    responses.push({
+      question: "Is there any symbolism you'd like included in your captive brand?",
+      answer: symbolism
+    });
+  }
+
+  if (colors) {
+    responses.push({
+      question: "What colors would you like to include?",
+      answer: colors
+    });
+  }
+
+  if (avoidColors) {
+    responses.push({
+      question: "What colors should be avoided?",
+      answer: avoidColors
+    });
+  }
+
+  try {
+    await axios.post("https://hooks.zapier.com/hooks/catch/11992512/u28cwau/", {
+      dealerName,
+      responses
+    });
+    res.status(200).send("Data relayed successfully to Zapier.");
   } catch (error) {
-    console.error("Relay error:", error);
-    res.status(500).json({ error: "Relay server failed to submit data." });
+    console.error("Error relaying to Zapier:", error.message);
+    res.status(500).send("Error relaying data to Zapier.");
   }
 });
 
