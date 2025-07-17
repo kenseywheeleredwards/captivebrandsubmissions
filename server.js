@@ -68,7 +68,7 @@ app.post('/submit', async (req, res) => {
   const mailOptions = {
     from: `Captive Brand Survey <${process.env.EMAIL_USER}>`,
     to: 'kensey.edwards@oroadrunnerfinancial.com',
-    subject: `New Captive Brand Submission,
+    subject: `New Captive Brand Submission`,
     html: htmlBody
   };
 
@@ -82,5 +82,5 @@ app.post('/submit', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
