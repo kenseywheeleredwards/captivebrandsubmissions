@@ -67,7 +67,7 @@ app.post('/submit', async (req, res) => {
 
   const mailOptions = {
     from: `Captive Brand Survey <${process.env.EMAIL_USER}>`,
-    to: 'kensey.edwards@oroadrunnerfinancial.com',
+    to: 'kensey.edwards@roadrunnerfinancial.com',
     subject: `New Captive Brand Submission`,
     html: htmlBody
   };
