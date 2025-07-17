@@ -14,12 +14,16 @@ app.post('/submit', async (req, res) => {
   const {
     dealerName,
     brandName,
+    brandIdeas,
     competitors,
     symbolism,
     colors,
     avoidColors,
     brandguidelines,
-    brandIdeas
+    brandoption, // capture dropdown response
+    q2_response, // button: brand name picked?
+    q4_response, // button: USPTO confirmed?
+    q4c_response // button: brand guideline status
   } = req.body;
 
   const responses = [];
@@ -48,7 +52,18 @@ app.post('/submit', async (req, res) => {
   if (avoidColors) {
     responses.push({ question: "What colors should be avoided?", answer: avoidColors });
   }
-
+if (q2_response) {
+  responses.push({ question: "Do you already have a brand name picked out for your captive?", answer: q2_response });
+}
+if (q4_response) {
+  responses.push({ question: "Have you confirmed that this name is available through the USPTO?", answer: q4_response });
+}
+if (q4c_response) {
+  responses.push({ question: "Do you have brand guidelines created already?", answer: q4c_response });
+}
+if (brandOption) {
+  responses.push({ question: "Which of the three suggested brands did you choose?", answer: brandOption });
+}
   const htmlBody = `
     <h2>Captive Brand Survey Submission</h2>
     <p><strong>Dealer Name:</strong> ${dealerName || 'N/A'}</p>
