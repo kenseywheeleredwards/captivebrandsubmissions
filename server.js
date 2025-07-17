@@ -1,7 +1,8 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const axios = require("axios");
-const cors = require("cors");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -10,72 +11,52 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(bodyParser.json());
 
-app.post("/", async (req, res) => {
-  const {
-    dealerName,
-    brandName,
-    competitors,
-    symbolism,
-    colors,
-    avoidColors
-  } = req.body;
+// POST handler
+app.post("/submit", async (req, res) => {
+  const { dealerName, responses } = req.body;
 
-  const responses = [];
+  // Format response body into Q&A style message
+  let message = `🧾 New Captive Brand Survey Submission\n\n`;
+  message += `👤 Dealer Name: ${dealerName || "N/A"}\n\n`;
 
-  if (dealerName) {
-    responses.push({
-      question: "What is your name and what dealership are you from?",
-      answer: dealerName
+  if (responses?.length) {
+    responses.forEach((r, i) => {
+      message += `Q${i + 1}: ${r.question || "(no question)"}\n`;
+      message += `A: ${r.answer || "(no answer)"}\n\n`;
     });
+  } else {
+    message += "No detailed responses submitted.\n";
   }
 
-  if (brandName) {
-    responses.push({
-      question: "What do you want to call it?",
-      answer: brandName
-    });
-  }
+  // Optional: Write to local log file
+  fs.appendFile("submissions.txt", message + "-------------------------\n", (err) => {
+    if (err) console.error("Failed to log to file:", err);
+  });
 
-  if (competitors) {
-    responses.push({
-      question: "Who are your top competitors?",
-      answer: competitors
-    });
-  }
-
-  if (symbolism) {
-    responses.push({
-      question: "Is there any symbolism you'd like included in your captive brand?",
-      answer: symbolism
-    });
-  }
-
-  if (colors) {
-    responses.push({
-      question: "What colors would you like to include?",
-      answer: colors
-    });
-  }
-
-  if (avoidColors) {
-    responses.push({
-      question: "What colors should be avoided?",
-      answer: avoidColors
-    });
-  }
+  // Send email via Nodemailer (use Gmail, Mailgun, or other SMTP)
+  const transporter = nodemailer.createTransport({
+    service: 'gmail', // or 'SendGrid', 'Mailgun', etc.
+    auth: {
+      user: process.env.EMAIL_USER,       // Your email (e.g. gmail)
+      pass: process.env.EMAIL_PASS        // App password (not account password)
+    }
+  });
 
   try {
-    await axios.post("https://hooks.slack.com/triggers/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", {
-      dealerName,
-      responses
+    await transporter.sendMail({
+      from: `"Captive Survey Bot" <${process.env.EMAIL_USER}>`,
+      to: "kensey.edwards@octane.co", // or whatever email you prefer
+      subject: "📬 New Captive Brand Survey Submission",
+      text: message
     });
-    res.status(200).send("Data relayed successfully.");
-  } catch (error) {
-    console.error("Error relaying:", error.message);
-    res.status(500).send("Error relaying data.");
+
+    res.status(200).json({ success: true, message: "Email sent and logged." });
+  } catch (err) {
+    console.error("Email failed:", err);
+    res.status(500).json({ success: false, error: "Failed to send email." });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Relay server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
