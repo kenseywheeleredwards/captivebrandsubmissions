@@ -20,7 +20,7 @@ app.post('/submit', async (req, res) => {
     colors,
     avoidColors,
     brandguidelines,
-    brandoption, // capture dropdown response
+    brandOption, // capture dropdown response
     q2_response, // button: brand name picked?
     q4_response, // button: USPTO confirmed?
     q4c_response // button: brand guideline status
