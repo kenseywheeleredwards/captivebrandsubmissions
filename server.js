@@ -20,10 +20,11 @@ const {
   colors,
   avoidColors,
   brandguidelines,
-  brandOption,           // updated casing
-  usptoConfirmed,        // updated key
-  hasBrandGuidelines,    // updated key
-  brandFeel              // updated key
+  brandOption,    
+  usptoConfirmed, 
+  hasBrandGuidelines, 
+  brandFeel,
+  hasBrandName,
 } = req.body;
 
   const responses = [];
