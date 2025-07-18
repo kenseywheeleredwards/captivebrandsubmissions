@@ -32,6 +32,9 @@ const {
   if (dealerName) {
     responses.push({ question: "What is your name and what dealership are you from?", answer: dealerName });
   }
+  if (hasBrandName) {
+  responses.push({ question: "Do you already have a brand name picked out for your captive?", answer: hasBrandName });
+}
   if (brandName) {
     responses.push({ question: "What do you want to call it?", answer: brandName });
   }
