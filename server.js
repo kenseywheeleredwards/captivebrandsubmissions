@@ -11,20 +11,20 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.post('/submit', async (req, res) => {
-  const {
-    dealerName,
-    brandName,
-    brandIdeas,
-    competitors,
-    symbolism,
-    colors,
-    avoidColors,
-    brandguidelines,
-    brandOption, // capture dropdown response
-    q2_response, // button: brand name picked?
-    q4_response, // button: USPTO confirmed?
-    q4c_response // button: brand guideline status
-  } = req.body;
+const {
+  dealerName,
+  brandName,
+  brandIdeas,
+  competitors,
+  symbolism,
+  colors,
+  avoidColors,
+  brandguidelines,
+  brandOption,           // updated casing
+  usptoConfirmed,        // updated key
+  hasBrandGuidelines,    // updated key
+  brandFeel              // updated key
+} = req.body;
 
   const responses = [];
 
@@ -52,14 +52,14 @@ app.post('/submit', async (req, res) => {
   if (avoidColors) {
     responses.push({ question: "What colors should be avoided?", answer: avoidColors });
   }
-if (q2_response) {
-  responses.push({ question: "Do you already have a brand name picked out for your captive?", answer: q2_response });
+if (usptoConfirmed) {
+  responses.push({ question: "Have you confirmed that this name is available through the USPTO?", answer: usptoConfirmed });
 }
-if (q4_response) {
-  responses.push({ question: "Have you confirmed that this name is available through the USPTO?", answer: q4_response });
+if (hasBrandGuidelines) {
+  responses.push({ question: "Do you have brand guidelines created already?", answer: hasBrandGuidelines });
 }
-if (q4c_response) {
-  responses.push({ question: "Do you have brand guidelines created already?", answer: q4c_response });
+if (brandFeel) {
+  responses.push({ question: "Do you want the new brand to feel similar or different than your dealership?", answer: brandFeel });
 }
 if (brandOption) {
   responses.push({ question: "Which of the three suggested brands did you choose?", answer: brandOption });
